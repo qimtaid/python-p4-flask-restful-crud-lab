@@ -7,7 +7,7 @@ from flask_restful import Api, Resource
 from models import db, Plant
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///plants.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'qlite:///plants.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
@@ -46,6 +46,14 @@ class PlantByID(Resource):
     def get(self, id):
         plant = Plant.query.filter_by(id=id).first().to_dict()
         return make_response(jsonify(plant), 200)
+
+    def delete(self, id):
+        plant = Plant.query.filter_by(id=id).first()
+        if plant is None:
+            return make_response(jsonify({"error": "Plant not found"}), 404)
+        db.session.delete(plant)
+        db.session.commit()
+        return make_response(jsonify({"message": "Plant deleted successfully"}), 200)
 
 
 api.add_resource(PlantByID, '/plants/<int:id>')
